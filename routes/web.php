@@ -14,6 +14,11 @@ use App\Http\Controllers\DietterController;
 |
 */
 Route::get('/dietter', [DietterController::class, 'index']);
+Route::post('/kCalInput', [DietterController::class, 'eatMasterStore'])->name('kCalInput.submit');
+Route::post('/eatingInput', [DietterController::class, 'eatingHistoryStore'])->name('eatingInput.submit');
+Route::post('/judge', [DietterController::class, 'judge'])->name('judge.submit');
+
+
 Route::get('/', function () {
     return view('welcome');
 });
