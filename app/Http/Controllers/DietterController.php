@@ -12,6 +12,8 @@ use App\Services\CommonInfoService;
 use App\Services\EatingHistoryService;
 use App\Http\Controllers\Controller;
 
+use function PHPUnit\Framework\isEmpty;
+
 class DietterController extends Controller
 {
     protected
@@ -68,6 +70,9 @@ class DietterController extends Controller
     public function eatingHistoryStore(Request $request) {
         $currentDate = date("Y-m-d");
         // バリデーションなどの処理を追加する場合はここに記述
+        if (empty($request->eating[0])) {
+            return redirect('/dietter')->with('message', '食品を入力してください');
+        }
 
         // データの登録
         for ($i = 0; $i < count($request->eating); $i++) {
@@ -96,6 +101,9 @@ class DietterController extends Controller
         $eatingArray = $this->eatingHistoryService->getEatingArray($eatingHistory);
 
         $usedCalHistory = UsedCalHistory::where('inputDate', $currentDate)->get();
+        if ($usedCalHistory->isEmpty()) {
+            return redirect('/dietter')->with('message', '本日の記録がされていません。記録後に判定してください。');
+        }
         $useKCal = $usedCalHistory[0]->usedCal;
 
         $eatMaster = EatMaster::whereIn('eat', $eatingArray)->get();

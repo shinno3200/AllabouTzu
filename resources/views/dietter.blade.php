@@ -34,12 +34,12 @@
         <form id="kCal" action="{{ route('kCalInput.submit') }}" method="post">
             @csrf
             <div class="container">
-                <div class="item">食品</div><input type="text" name="eatInfo">
-                <input type="submit" value="登録" name="kCalInput">
+                <div class="item">食品</div><input type="text" name="eatInfo" id="eatInfo">
+                <input type="button" value="登録" name="kCalInput" onclick="validateForm()">
             </div>
             <div class="container">
                 <div class="item">カロリー</div>
-                <input type="text" name="kCalInfo" value="">kcal
+                <input type="text" name="kCalInfo" value="" id="kCalInfo">kcal
             </div>
         </form>
     </div>
@@ -138,6 +138,24 @@ function addRow() {
     var cell2 = newRow.insertCell(1);
     cell1.innerHTML = "<td><input type="+"text"+" name="+"eating[]"+" class="+"eatingBox"+"></td>";
     cell2.innerHTML = "<td><select name="+"number[]"+" class="+"numberSelect"+"><option value=1>1</option><option value=2>2</option><option value=3>3</option></select></td>";
+}
+
+function validateForm() {
+    var eatInfo = document.getElementById('eatInfo').value;
+    var kCalInfo = document.getElementById('kCalInfo').value;
+
+    // バリデーションチェック
+    if (eatInfo.trim() === '') {
+        alert('食品を入力してください。');
+        return;
+    }
+    if (kCalInfo.trim() === '') {
+        alert('カロリーを入力してください。');
+        return;
+    }
+            
+    // バリデーションが成功した場合はフォームをサブミット
+    document.getElementById('kCal').submit();
 }
 </script>
 
