@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DietterController;
+use App\Http\Controllers\TSI\TSIController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,8 @@ Route::post('/kCalInput', [DietterController::class, 'eatMasterStore'])->name('k
 Route::post('/eatingInput', [DietterController::class, 'eatingHistoryStore'])->name('eatingInput.submit');
 Route::post('/judge', [DietterController::class, 'judge'])->name('judge.submit');
 
+Route::get('/tsi', [TSIController::class, 'index']);
+Route::post('/tsi/search', [TSIController::class, 'search'])->name('search.submit');
 
 Route::get('/', function () {
     return view('welcome');

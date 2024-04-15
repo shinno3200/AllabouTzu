@@ -11,51 +11,50 @@
 
 <?php
     //履歴検索
-    $pdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-    $stmt = $pdo->prepare("SELECT inputDate, totalKcal, lostKcal, judgeResult FROM judgeHistory WHERE inputDate between DATE_SUB(NOW(), INTERVAL 7 DAY) and :cDate ORDER BY inputDate DESC");
-    $stmt->bindParam(':cDate', $currentDate);
-    $stmt->execute();
-    $judgeDataList = array(); // 配列作成
-    while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
-        array_push($judgeDataList, ["inputDate" => $row['inputDate'], "totalKcal" => $row['totalKcal'], "lostKcal" => $row['lostKcal'], "judgeResult" => $row['judgeResult']]);
-        $weekTotalKCal += $row['totalKcal'];
-        $weekUseKCal += $row['lostKcal'];
-    }
-    $weekJudgeResultNum = $weekTotalKCal - $weekUseKCal;
+    $pdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+$stmt = $pdo->prepare('SELECT inputDate, totalKcal, lostKcal, judgeResult FROM judgeHistory WHERE inputDate between DATE_SUB(NOW(), INTERVAL 7 DAY) and :cDate ORDER BY inputDate DESC');
+$stmt->bindParam(':cDate', $currentDate);
+$stmt->execute();
+$judgeDataList = []; // 配列作成
+while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
+    array_push($judgeDataList, ['inputDate' => $row['inputDate'], 'totalKcal' => $row['totalKcal'], 'lostKcal' => $row['lostKcal'], 'judgeResult' => $row['judgeResult']]);
+    $weekTotalKCal += $row['totalKcal'];
+    $weekUseKCal += $row['lostKcal'];
+}
+$weekJudgeResultNum = $weekTotalKCal - $weekUseKCal;
 ?>
 
 <?php
     //記録
-    if (!empty($_POST['recordButton'])) {
+    if (! empty($_POST['recordButton'])) {
         try {
             //食品経歴の登録
             $eats = $_POST['eating'];
             $nums = $_POST['number'];
-            $recordPdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-            $stmt = $recordPdo->prepare("INSERT INTO eatingHistory (inputDate, eat, num) VALUES (:cDate, :eat, :num)");
+            $recordPdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+            $stmt = $recordPdo->prepare('INSERT INTO eatingHistory (inputDate, eat, num) VALUES (:cDate, :eat, :num)');
             for ($i = 0; $i < count($eats); $i++) {
                 $stmt->bindParam(':cDate', $currentDate);
                 $stmt->bindParam(':eat', $eats[$i]);
                 $stmt->bindParam(':num', $nums[$i]);
-                
+
                 $stmt->execute();
             }
-            
+
             //消費Kcal経歴の登録
-            $stmt = $recordPdo->prepare("SELECT * FROM usedCalHistory WHERE inputDate = :cDate");
+            $stmt = $recordPdo->prepare('SELECT * FROM usedCalHistory WHERE inputDate = :cDate');
             $stmt->bindParam(':cDate', $currentDate);
             $stmt->execute();
-            if (!$stmt->fetch()) {
-                $stmt = $recordPdo->prepare("INSERT INTO usedCalHistory (inputDate, usedCal) VALUES (:cDate, :usedCal)");
+            if (! $stmt->fetch()) {
+                $stmt = $recordPdo->prepare('INSERT INTO usedCalHistory (inputDate, usedCal) VALUES (:cDate, :usedCal)');
                 $stmt->bindParam(':cDate', $currentDate);
                 $stmt->bindParam(':usedCal', $_POST['usekCal']);
                 $stmt->execute();
             }
-            
 
             $recordPdo = null;
 
-            echo "消費カロリーと食べた飲食品を登録しました。";
+            echo '消費カロリーと食べた飲食品を登録しました。';
         } catch (PDOException $e) {
             echo $e->getMessage();
         }
@@ -64,22 +63,22 @@
 
 <?php
     //判定処理
-    if (!empty($_POST['judgeCorrectButton'])) {
+    if (! empty($_POST['judgeCorrectButton'])) {
         //1:食品経歴から当日の食品と個数を取得
-        $pdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-        $stmt = $pdo->prepare("SELECT eat, num FROM eatingHistory WHERE inputDate = :cDate");
+        $pdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+        $stmt = $pdo->prepare('SELECT eat, num FROM eatingHistory WHERE inputDate = :cDate');
         $stmt->bindParam(':cDate', $currentDate);
         $stmt->execute();
-        $eatDataList = array(); // 配列作成
-        $eatingInStr = "";
+        $eatDataList = []; // 配列作成
+        $eatingInStr = '';
         while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
-            array_push($eatDataList, ["eat" => $row['eat'], "num" => $row['num']]);
+            array_push($eatDataList, ['eat' => $row['eat'], 'num' => $row['num']]);
             $eatingInStr = $eatingInStr."'".$row['eat']."',";
         }
         $eatingInStr = substr($eatingInStr, 0, -1);
 
         //2:消費カロリー経歴から当日の消費カロリーを取得
-        $stmt = $pdo->prepare("SELECT usedCal FROM usedCalHistory WHERE inputDate = :cDate");
+        $stmt = $pdo->prepare('SELECT usedCal FROM usedCalHistory WHERE inputDate = :cDate');
         $stmt->bindParam(':cDate', $currentDate);
         $stmt->execute();
 
@@ -88,9 +87,9 @@
         //3:1で取得した食品を条件に食品マスタからカロリーを取得
         $stmt = $pdo->prepare("SELECT eat, kCal FROM eatMaster WHERE eat in ($eatingInStr)");
         $stmt->execute();
-        $calDataList = array(); // 配列作成
+        $calDataList = []; // 配列作成
         while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
-            array_push($calDataList, ["eat" => $row['eat'], "kCal" => $row['kCal']]);
+            array_push($calDataList, ['eat' => $row['eat'], 'kCal' => $row['kCal']]);
         }
 
         //4:総合カロリー = 3のカロリー * 個数
@@ -112,22 +111,22 @@
 
 <?php
     //判定処理
-    if (!empty($_POST['judgeButton'])) {
+    if (! empty($_POST['judgeButton'])) {
         //1:食品経歴から当日の食品と個数を取得
-        $pdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-        $stmt = $pdo->prepare("SELECT eat, num FROM eatingHistory WHERE inputDate = :cDate");
+        $pdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+        $stmt = $pdo->prepare('SELECT eat, num FROM eatingHistory WHERE inputDate = :cDate');
         $stmt->bindParam(':cDate', $currentDate);
         $stmt->execute();
-        $eatDataList = array(); // 配列作成
-        $eatingInStr = "";
+        $eatDataList = []; // 配列作成
+        $eatingInStr = '';
         while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
-            array_push($eatDataList, ["eat" => $row['eat'], "num" => $row['num']]);
+            array_push($eatDataList, ['eat' => $row['eat'], 'num' => $row['num']]);
             $eatingInStr = $eatingInStr."'".$row['eat']."',";
         }
         $eatingInStr = substr($eatingInStr, 0, -1);
 
         //2:消費カロリー経歴から当日の消費カロリーを取得
-        $stmt = $pdo->prepare("SELECT usedCal FROM usedCalHistory WHERE inputDate = :cDate");
+        $stmt = $pdo->prepare('SELECT usedCal FROM usedCalHistory WHERE inputDate = :cDate');
         $stmt->bindParam(':cDate', $currentDate);
         $stmt->execute();
 
@@ -136,9 +135,9 @@
         //3:1で取得した食品を条件に食品マスタからカロリーを取得
         $stmt = $pdo->prepare("SELECT eat, kCal FROM eatMaster WHERE eat in ($eatingInStr)");
         $stmt->execute();
-        $calDataList = array(); // 配列作成
+        $calDataList = []; // 配列作成
         while ($row = $stmt->fetch()) { // 実行結果の初めの行から順に取得
-            array_push($calDataList, ["eat" => $row['eat'], "kCal" => $row['kCal']]);
+            array_push($calDataList, ['eat' => $row['eat'], 'kCal' => $row['kCal']]);
         }
 
         //4:総合カロリー = 3のカロリー * 個数
@@ -160,9 +159,9 @@
 
 <?php
     //判定結果登録
-    if (!empty($_POST['judgeCorrectButton'])) {
-        $pdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-        $stmt = $pdo->prepare("INSERT INTO judgeHistory (inputDate, totalKcal, lostKcal, judgeResult) VALUES (:cDate, :tKcal, :lKcal, :result)");
+    if (! empty($_POST['judgeCorrectButton'])) {
+        $pdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+        $stmt = $pdo->prepare('INSERT INTO judgeHistory (inputDate, totalKcal, lostKcal, judgeResult) VALUES (:cDate, :tKcal, :lKcal, :result)');
         $stmt->bindParam(':cDate', $currentDate);
         $stmt->bindParam(':tKcal', $_POST['totalKCal']);
         $stmt->bindParam(':lKcal', $_POST['useKCal']);
@@ -170,21 +169,21 @@
         $stmt->execute();
         $pdo = null;
 
-        echo "判定結果を登録しました。";
+        echo '判定結果を登録しました。';
     }
 ?>
 
 <?php
     //カロリー登録
-    if (!empty($_POST['kCalInputButton'])) {
-        $pdo = new PDO('mysql:host=localhost;dbname=dietter', "root", "root");
-        $stmt = $pdo->prepare("INSERT INTO eatMaster (eat, kCal) VALUES (:eat, :cal)");
+    if (! empty($_POST['kCalInputButton'])) {
+        $pdo = new PDO('mysql:host=localhost;dbname=dietter', 'root', 'root');
+        $stmt = $pdo->prepare('INSERT INTO eatMaster (eat, kCal) VALUES (:eat, :cal)');
         $stmt->bindParam(':eat', $_POST['eatInfo']);
         $stmt->bindParam(':cal', $_POST['kCalInfo']);
         $stmt->execute();
         $pdo = null;
 
-        echo "カロリーを登録しました。";
+        echo 'カロリーを登録しました。';
     }
 ?>
 
@@ -285,14 +284,14 @@
                 <th class="infoHead">消費カロリー</th>
                 <th class="resultHead">判定結果</th>
             </tr>
-            <?php foreach($judgeDataList as $judgeData) : ?>
+            <?php foreach ($judgeDataList as $judgeData) { ?>
             <tr>
                 <td><input type="text" name="" class="unInputItem" value="<?php echo $judgeData['inputDate'] ?>"></td>
                 <td><input type="text" name="" class="unInputItem" value="<?php echo $judgeData['totalKcal'] ?>"></td>
                 <td><input type="text" name="" class="unInputItem" value="<?php echo $judgeData['lostKcal'] ?>"></td>
                 <td><input type="text" name="" class="unInputItem" value="<?php echo $judgeData['judgeResult'] ?>"></td>
             </tr>
-            <?php endforeach; ?>
+            <?php } ?>
         </table>
     </div>
 </div>

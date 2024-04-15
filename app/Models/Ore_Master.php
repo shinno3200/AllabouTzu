@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Ore_Master extends Model{
+use Illuminate\Database\Eloquent\Model;
+
+class Ore_Master extends Model
+{
     // テーブル名の指定（デフォルトではクラス名のスネークケースが使用される）
     protected $table = 'oreMaster';
 
