@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DietterController;
 use App\Http\Controllers\TSI\TSIController;
+use App\Http\Controllers\Persona\PersonarsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,9 @@ Route::post('/judge', [DietterController::class, 'judge'])->name('judge.submit')
 
 Route::get('/tsi', [TSIController::class, 'index']);
 Route::post('/tsi/search', [TSIController::class, 'search'])->name('search.submit');
+
+Route::get('/personars', [PersonarsController::class, 'index']);
+Route::post('/personars/add', [PersonarsController::class, 'store'])->name('add.submit');
 
 Route::get('/', function () {
     return view('welcome');
